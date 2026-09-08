@@ -19,7 +19,7 @@ final class ContentValidator
     public const array ENTRY_REQUIRED_SECTIONS = ['Was', 'Warum', 'Wie', 'Tests', 'Lernpunkte'];
 
     /** Agent roles that may appear in `agents` (never tool or vendor names). */
-    public const array KNOWN_AGENTS = ['architect', 'tester', 'implementer', 'uiux', 'researcher', 'agentic-engineer'];
+    public const array KNOWN_AGENTS = ['architect', 'tester', 'implementer', 'uiux', 'documentarian', 'researcher', 'agentic-engineer'];
 
     private const array ENTRY_FIELDS = ['id', 'title', 'date', 'type', 'agents', 'repos', 'tags', 'summary', 'learning_path', 'adrs'];
     private const array ENTRY_REQUIRED = ['id', 'title', 'date', 'type', 'agents', 'repos', 'summary'];
