@@ -36,6 +36,12 @@
         </span>
     {% endif %}
 
+    {% if isEntry and item.tickets is not empty and not compact|default(false) %}
+        <span class="meta__group" aria-label="Tickets">
+            {% for ticket in item.tickets %}<span class="badge badge--ticket">{{ ticket }}</span>{% endfor %}
+        </span>
+    {% endif %}
+
     {% if not isEntry and (item.supersedes or item.supersededBy) %}
         <span class="meta__group">
             {% if item.supersedes %}löst <a class="badge badge--adr" href="{{ path('adr', {id: item.supersedes}) }}">{{ item.supersedes }}</a> ab{% endif %}

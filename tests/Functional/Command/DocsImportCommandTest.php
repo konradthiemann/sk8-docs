@@ -162,6 +162,76 @@ final class DocsImportCommandTest extends KernelTestCase
         self::assertNull($this->entityManager->getRepository(DocTag::class)->findOneBy(['name' => 'docker']));
     }
 
+    public function testImportStoresTicketReferencesFromFrontmatter(): void
+    {
+        $dir = $this->copyFixtureToTempDir('content-valid');
+        $entryFile = $dir . '/entries/0002-zweiter-eintrag.md';
+        file_put_contents($entryFile, str_replace(
+            "summary: Ein zweiter gültiger Eintrag ohne Lernpfad.\n",
+            "summary: Ein zweiter gültiger Eintrag ohne Lernpfad.\ntickets: [T-0102, T-0104]\n",
+            (string) file_get_contents($entryFile),
+        ));
+
+        $exitCode = $this->tester->execute(['--content-dir' => $dir]);
+
+        self::assertSame(Command::SUCCESS, $exitCode, $this->tester->getDisplay());
+        $entry = $this->entityManager->find(DocEntry::class, 2);
+        self::assertInstanceOf(DocEntry::class, $entry);
+        self::assertSame(['T-0102', 'T-0104'], $entry->getTickets());
+    }
+
+    public function testImportSetsAnEmptyTicketListWhenTheFieldIsMissing(): void
+    {
+        $exitCode = $this->tester->execute(['--content-dir' => self::fixture('content-valid')]);
+
+        self::assertSame(Command::SUCCESS, $exitCode, $this->tester->getDisplay());
+        $entry = $this->entityManager->find(DocEntry::class, 1);
+        self::assertInstanceOf(DocEntry::class, $entry);
+        self::assertSame([], $entry->getTickets());
+    }
+
+    public function testReimportingAnEntryWithoutTicketsKeepsAnEmptyListAndSucceeds(): void
+    {
+        $dir = $this->copyFixtureToTempDir('content-valid');
+
+        $firstExitCode = $this->tester->execute(['--content-dir' => $dir]);
+        self::assertSame(Command::SUCCESS, $firstExitCode, $this->tester->getDisplay());
+        $this->entityManager->clear();
+        $afterFirstImport = $this->entityManager->find(DocEntry::class, 1);
+        self::assertInstanceOf(DocEntry::class, $afterFirstImport);
+        self::assertSame([], $afterFirstImport->getTickets());
+
+        // Simulates criterion 7: a row that already existed (imported here on the first
+        // run) before the `tickets` column/migration was added. Re-importing the same
+        // file, which still has no `tickets` field, must not fail and must keep an
+        // empty list, exactly like a migrated pre-existing row would.
+        $secondExitCode = $this->tester->execute(['--content-dir' => $dir]);
+        $this->entityManager->clear();
+
+        self::assertSame(Command::SUCCESS, $secondExitCode, $this->tester->getDisplay());
+        $afterSecondImport = $this->entityManager->find(DocEntry::class, 1);
+        self::assertInstanceOf(DocEntry::class, $afterSecondImport);
+        self::assertSame([], $afterSecondImport->getTickets());
+    }
+
+    public function testTheTicketsColumnDefaultsToAnEmptyListForRowsWrittenWithoutIt(): void
+    {
+        // Proves the migration's backfill mechanism directly at the schema level: an
+        // `ALTER TABLE ... ADD COLUMN tickets jsonb NOT NULL DEFAULT '[]'::jsonb`
+        // gives every pre-existing row (one imported before the column existed) an
+        // empty list instead of failing the NOT NULL constraint. Inserting a row
+        // without naming the `tickets` column exercises the very same default.
+        $connection = $this->entityManager->getConnection();
+        $connection->executeStatement(
+            "INSERT INTO doc_entry (id, slug, title, date, type, summary, agents, repos, adrs, body_markdown, body_html, imported_at)
+             VALUES (999, 'migrations-testeintrag', 'Migrations-Testeintrag', '2026-01-01', 'feature', 'x', '[]', '[]', '[]', 'x', 'x', now())",
+        );
+
+        $tickets = $connection->fetchOne('SELECT tickets FROM doc_entry WHERE id = 999');
+
+        self::assertSame('[]', $tickets);
+    }
+
     public function testImportFailsWithAClearMessageWhenTheDirectoryDoesNotExist(): void
     {
         $exitCode = $this->tester->execute(['--content-dir' => '/nirgendwo/content']);

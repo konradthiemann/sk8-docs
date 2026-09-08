@@ -234,6 +234,7 @@ final class ContentImporter
                 self::stringList($fm['agents']),
                 self::stringList($fm['repos']),
                 self::stringList($fm['adrs'] ?? []),
+                self::stringList($fm['tickets'] ?? []),
                 isset($fm['learning_path']) ? self::int($fm['learning_path']) : null,
                 $document->body,
                 $this->renderer->render($document->body),

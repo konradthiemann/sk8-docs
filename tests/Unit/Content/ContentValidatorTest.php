@@ -98,6 +98,53 @@ final class ContentValidatorTest extends TestCase
         self::assertSame([], $errors);
     }
 
+    public function testItAcceptsAnEntryWithValidTicketReferences(): void
+    {
+        $frontmatter = ['tickets' => ['T-0102', 'T-0104', 'R-04']] + self::validEntryFrontmatter();
+        $errors = $this->validator->validateEntry(
+            '0001-projekt-initialisierung.md',
+            new ParsedDocument($frontmatter, self::ENTRY_BODY),
+        );
+
+        self::assertSame([], $errors);
+    }
+
+    public function testItAcceptsAnEntryWithoutTheOptionalTicketsField(): void
+    {
+        $frontmatter = self::validEntryFrontmatter();
+        unset($frontmatter['tickets']);
+
+        $errors = $this->validator->validateEntry(
+            '0001-projekt-initialisierung.md',
+            new ParsedDocument($frontmatter, self::ENTRY_BODY),
+        );
+
+        self::assertSame([], $errors);
+    }
+
+    public function testItReportsTheInvalidTicketReferenceByNameInGerman(): void
+    {
+        $frontmatter = ['tickets' => ['XYZ']] + self::validEntryFrontmatter();
+        $errors = $this->validator->validateEntry(
+            '0001-projekt-initialisierung.md',
+            new ParsedDocument($frontmatter, self::ENTRY_BODY),
+        );
+
+        self::assertErrorFor($errors, 'tickets', 'XYZ');
+        self::assertErrorFor($errors, 'tickets', 'T-NNXX');
+    }
+
+    public function testItReportsThatASingleTicketMustBeGivenAsAList(): void
+    {
+        $frontmatter = ['tickets' => 'T-0102'] + self::validEntryFrontmatter();
+        $errors = $this->validator->validateEntry(
+            '0001-projekt-initialisierung.md',
+            new ParsedDocument($frontmatter, self::ENTRY_BODY),
+        );
+
+        self::assertErrorFor($errors, 'tickets', 'Liste');
+    }
+
     public function testItAcceptsAValidAdr(): void
     {
         $errors = $this->validator->validateAdr(

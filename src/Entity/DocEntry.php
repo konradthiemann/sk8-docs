@@ -51,6 +51,10 @@ class DocEntry
     #[ORM\Column(type: Types::JSON, options: ['jsonb' => true])]
     private array $adrs;
 
+    /** @var list<string> */
+    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true])]
+    private array $tickets;
+
     #[ORM\Column(name: 'learning_path', nullable: true)]
     private ?int $learningPath;
 
@@ -79,6 +83,7 @@ class DocEntry
      * @param list<string> $agents
      * @param list<string> $repos
      * @param list<string> $adrs
+     * @param list<string> $tickets
      */
     public function __construct(
         int $id,
@@ -90,6 +95,7 @@ class DocEntry
         array $agents,
         array $repos,
         array $adrs,
+        array $tickets,
         ?int $learningPath,
         string $bodyMarkdown,
         string $bodyHtml,
@@ -97,7 +103,7 @@ class DocEntry
     ) {
         $this->id = $id;
         $this->tags = new ArrayCollection();
-        $this->update($slug, $title, $date, $type, $summary, $agents, $repos, $adrs, $learningPath, $bodyMarkdown, $bodyHtml, $importedAt);
+        $this->update($slug, $title, $date, $type, $summary, $agents, $repos, $adrs, $tickets, $learningPath, $bodyMarkdown, $bodyHtml, $importedAt);
     }
 
     /**
@@ -106,6 +112,7 @@ class DocEntry
      * @param list<string> $agents
      * @param list<string> $repos
      * @param list<string> $adrs
+     * @param list<string> $tickets
      */
     public function update(
         string $slug,
@@ -116,6 +123,7 @@ class DocEntry
         array $agents,
         array $repos,
         array $adrs,
+        array $tickets,
         ?int $learningPath,
         string $bodyMarkdown,
         string $bodyHtml,
@@ -129,6 +137,7 @@ class DocEntry
         $this->agents = $agents;
         $this->repos = $repos;
         $this->adrs = $adrs;
+        $this->tickets = $tickets;
         $this->learningPath = $learningPath;
         $this->bodyMarkdown = $bodyMarkdown;
         $this->bodyHtml = $bodyHtml;
@@ -192,6 +201,12 @@ class DocEntry
     public function getAdrs(): array
     {
         return $this->adrs;
+    }
+
+    /** @return list<string> */
+    public function getTickets(): array
+    {
+        return $this->tickets;
     }
 
     public function getLearningPath(): ?int
