@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Repos – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <h1>Repos</h1>
+        <p class="lead">Die sechs Repositories der Plattform und was in ihnen passiert ist.</p>
+    </header>
+
+    {% if repos is empty %}
+        <p class="empty-state">Noch keine Einträge, daher noch keine Repos.</p>
+    {% else %}
+        <ul class="link-list">
+            {% for repo in repos %}
+                <li><a class="badge badge--repo" href="{{ path('repo', {name: repo.name}) }}">{{ repo.name }}</a> {{ repo.entries }} {{ repo.entries == 1 ? 'Eintrag' : 'Einträge' }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

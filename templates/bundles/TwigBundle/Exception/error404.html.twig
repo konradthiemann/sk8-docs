@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nicht gefunden – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <h1>Seite nicht gefunden</h1>
+        <p class="lead">Diese Adresse führt ins Leere – vielleicht wurde der Eintrag umbenannt oder noch nicht importiert.</p>
+    </header>
+    <p><a href="{{ path('chronicle') }}">Zur Chronik</a> · <a href="{{ path('search') }}">Suche</a></p>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ entry.title }} – SK8 Doku{% endblock %}
+
+{% block body %}
+    <article class="document">
+        <header class="page-header">
+            <p class="breadcrumb"><a href="{{ path('chronicle') }}">Chronik</a> · Eintrag {{ '%04d'|format(entry.id) }}</p>
+            <h1>{{ entry.title }}</h1>
+            <p class="lead">{{ entry.summary }}</p>
+            {{ include('_partials/_meta.html.twig', {item: entry, adrTitles: adrTitles}) }}
+        </header>
+
+        <div class="prose">
+            {{ entry.bodyHtml|raw }}
+        </div>
+
+        <footer class="document__footer">
+            <p>Quelle: <code>content/entries/{{ '%04d'|format(entry.id) }}-{{ entry.slug }}.md</code> · importiert am {{ entry.importedAt|format_datetime(pattern="d. MMMM y, HH:mm", locale='de') }}</p>
+        </footer>
+    </article>
+{% endblock %}

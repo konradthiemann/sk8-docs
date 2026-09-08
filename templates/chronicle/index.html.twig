@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Chronik – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <h1>Chronik</h1>
+        <p class="lead">Jedes Feature der SK8-Plattform, chronologisch: <strong>Was</strong> gebaut wurde, <strong>warum</strong> so und <strong>wie</strong> – mit Tests und Lernpunkten.</p>
+    </header>
+
+    <section class="stats" aria-label="Kennzahlen">
+        <div class="stat">
+            <span class="stat__value">{{ daysLeft }}</span>
+            <span class="stat__label">Noch {{ daysLeft }} Tage bis zum Contest ({{ contestDate|format_date(pattern='d. MMMM y', locale='de') }})</span>
+        </div>
+        <div class="stat">
+            <span class="stat__value">{{ countByType|reduce((sum, n) => sum + n, 0) }}</span>
+            <span class="stat__label">Einträge</span>
+        </div>
+        <div class="stat">
+            <span class="stat__value"><a href="{{ path('adr_list') }}">{{ adrCount }}</a></span>
+            <span class="stat__label">Architektur-Entscheidungen</span>
+        </div>
+        {% if countByType is not empty %}
+            <div class="stat stat--chart">
+                <canvas data-chart="bar" height="90" aria-label="Einträge je Typ" role="img"
+                        data-labels="{{ types|filter(t => countByType[t.value] is defined)|map(t => t.label)|json_encode }}"
+                        data-values="{{ types|filter(t => countByType[t.value] is defined)|map(t => countByType[t.value])|json_encode }}"></canvas>
+                <span class="stat__label">Einträge je Typ</span>
+            </div>
+        {% endif %}
+    </section>
+
+    <form class="filter" method="get" action="{{ path('chronicle') }}">
+        <label>Typ
+            <select name="type">
+                <option value="">alle</option>
+                {% for type in types %}
+                    <option value="{{ type.value }}" {% if filter.type == type.value %}selected{% endif %}>{{ type.label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Repo
+            <select name="repo">
+                <option value="">alle</option>
+                {% for repo in repos %}
+                    <option value="{{ repo.name }}" {% if filter.repo == repo.name %}selected{% endif %}>{{ repo.name }} ({{ repo.entries }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Tag
+            <select name="tag">
+                <option value="">alle</option>
+                {% for tag in tags %}
+                    <option value="{{ tag.name }}" {% if filter.tag == tag.name %}selected{% endif %}>#{{ tag.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit">Filtern</button>
+        {% if filter.type or filter.repo or filter.tag %}
+            <a class="filter__reset" href="{{ path('chronicle') }}">Filter zurücksetzen</a>
+        {% endif %}
+    </form>
+
+    {{ include('_partials/_entry_list.html.twig', {
+        entries: entries,
+        adrTitles: adrTitles,
+        emptyText: (filter.type or filter.repo or filter.tag)
+            ? 'Noch keine Einträge zu diesem Filter. Setze den Filter zurück oder stöbere in den Architektur-Entscheidungen.'
+            : 'Noch keine Einträge. Der erste Feature-Lauf legt content/entries/0001-… an – bis dahin lohnt ein Blick in die Architektur-Entscheidungen.'
+    }) }}
+{% endblock %}

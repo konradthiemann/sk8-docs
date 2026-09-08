@@ -1,0 +1,19 @@
+{# Parameters: entries (list<DocEntry>), adrTitles, emptyText (string), numbered (bool) #}
+{% if entries is empty %}
+    <p class="empty-state">{{ emptyText|default('Noch keine Einträge vorhanden.') }}</p>
+{% else %}
+    <ol class="entry-list{% if numbered|default(false) %} entry-list--numbered{% endif %}">
+        {% for entry in entries %}
+            <li>
+                <article class="entry-card">
+                    <h2 class="entry-card__title">
+                        {% if numbered|default(false) %}<span class="entry-card__position">{{ entry.learningPath }}</span>{% endif %}
+                        <a href="{{ path('entry', {slug: entry.slug}) }}">{{ entry.title }}</a>
+                    </h2>
+                    <p class="entry-card__summary">{{ entry.summary }}</p>
+                    {{ include('_partials/_meta.html.twig', {item: entry, adrTitles: adrTitles|default({}), compact: true}) }}
+                </article>
+            </li>
+        {% endfor %}
+    </ol>
+{% endif %}

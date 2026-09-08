@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sk8
+          POSTGRES_PASSWORD: sk8
+          POSTGRES_DB: sk8_docs_test
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U sk8"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build dev image
+        run: make build
+
+      - name: Install dependencies
+        run: make composer ARGS="install --no-progress --prefer-dist"
+
+      - name: Point the container at the PostgreSQL service
+        run: |
+          echo 'DATABASE_URL="postgresql://sk8:sk8@host.docker.internal:5432/sk8_docs?serverVersion=16&charset=utf8"' > .env.local
+          echo 'DATABASE_URL="postgresql://sk8:sk8@host.docker.internal:5432/sk8_docs_test?serverVersion=16&charset=utf8"' > .env.test.local
+
+      - name: Install importmap packages
+        run: make console ARGS="importmap:install"
+
+      - name: phpstan, php-cs-fixer, phpunit
+        run: make check
+
+      - name: Validate content
+        run: make console ARGS="docs:import --dry-run"
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build production image
+        run: docker build --target frankenphp_prod .

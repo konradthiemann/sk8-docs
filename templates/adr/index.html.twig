@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Architektur-Entscheidungen – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <h1>Architektur-Entscheidungen</h1>
+        <p class="lead">Architecture Decision Records (ADRs): verbindliche Entscheidungen mit Kontext, Alternativen und Konsequenzen. Bestehende ADRs werden nie umgeschrieben, sondern abgelöst.</p>
+    </header>
+
+    {% if adrs is empty %}
+        <p class="empty-state">Noch keine Entscheidungen importiert. <code>bin/console docs:import</code> liest sie aus <code>content/adr/</code>.</p>
+    {% else %}
+        <ol class="adr-list">
+            {% for adr in adrs %}
+                <li class="adr-list__item">
+                    <span class="adr-list__id">{{ adr.id }}</span>
+                    <div class="adr-list__body">
+                        <h2 class="adr-list__title"><a href="{{ path('adr', {id: adr.id}) }}">{{ adr.title }}</a></h2>
+                        {{ include('_partials/_meta.html.twig', {item: adr, adrTitles: {}, compact: true}) }}
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+{% endblock %}

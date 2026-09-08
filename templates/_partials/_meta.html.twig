@@ -1,0 +1,45 @@
+{#
+  Metadata line for entries and ADRs: German date, badges for type/status, agents, repos, tags, ADR links.
+  Parameters: item (DocEntry|DocAdr), adrTitles (id => title), compact (bool, list view)
+#}
+{% set isEntry = item.type is defined %}
+<div class="meta">
+    <time class="meta__date" datetime="{{ item.date|date('Y-m-d') }}">{{ item.date|format_date(pattern='d. MMMM y', locale='de') }}</time>
+
+    {% if isEntry %}
+        <a class="badge badge--type badge--{{ item.type.value }}" href="{{ path('chronicle', {type: item.type.value}) }}">{{ item.type.label }}</a>
+    {% else %}
+        {{ include('_partials/_adr_status.html.twig', {status: item.status}) }}
+    {% endif %}
+
+    <span class="meta__group" aria-label="Agenten">
+        {% for agent in item.agents %}<span class="badge badge--agent">{{ agent }}</span>{% endfor %}
+    </span>
+
+    {% if isEntry and item.repos is not empty %}
+        <span class="meta__group" aria-label="Repos">
+            {% for repo in item.repos %}<a class="badge badge--repo" href="{{ path('repo', {name: repo}) }}">{{ repo }}</a>{% endfor %}
+        </span>
+    {% endif %}
+
+    {% if item.tags is not empty %}
+        <span class="meta__group" aria-label="Tags">
+            {% for tag in item.tags %}<a class="badge badge--tag" href="{{ path('tag', {name: tag.name}) }}">#{{ tag.name }}</a>{% endfor %}
+        </span>
+    {% endif %}
+
+    {% if isEntry and item.adrs is not empty and not compact|default(false) %}
+        <span class="meta__group" aria-label="Verknüpfte Entscheidungen">
+            {% for adrId in item.adrs %}
+                <a class="badge badge--adr" href="{{ path('adr', {id: adrId}) }}" title="{{ adrTitles[adrId]|default('') }}">{{ adrId }}</a>
+            {% endfor %}
+        </span>
+    {% endif %}
+
+    {% if not isEntry and (item.supersedes or item.supersededBy) %}
+        <span class="meta__group">
+            {% if item.supersedes %}löst <a class="badge badge--adr" href="{{ path('adr', {id: item.supersedes}) }}">{{ item.supersedes }}</a> ab{% endif %}
+            {% if item.supersededBy %}abgelöst durch <a class="badge badge--adr" href="{{ path('adr', {id: item.supersededBy}) }}">{{ item.supersededBy }}</a>{% endif %}
+        </span>
+    {% endif %}
+</div>

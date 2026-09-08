@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Fehler – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <h1>Da ist etwas schiefgelaufen</h1>
+        <p class="lead">Fehler {{ status_code }}: {{ status_text }}. Versuch es in einem Moment noch einmal.</p>
+    </header>
+    <p><a href="{{ path('chronicle') }}">Zur Chronik</a></p>
+{% endblock %}

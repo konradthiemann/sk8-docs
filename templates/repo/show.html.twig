@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ repo }} – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <p class="breadcrumb"><a href="{{ path('repo_list') }}">Repos</a></p>
+        <h1>{{ repo }}</h1>
+        <p class="lead">Alle Einträge, die dieses Repository berühren.</p>
+    </header>
+
+    {{ include('_partials/_entry_list.html.twig', {entries: entries, adrTitles: adrTitles}) }}
+{% endblock %}

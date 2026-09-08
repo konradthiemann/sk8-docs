@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}#{{ tag.name }} – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <p class="breadcrumb"><a href="{{ path('tag_list') }}">Tags</a></p>
+        <h1>#{{ tag.name }}</h1>
+    </header>
+
+    <section>
+        <h2>Einträge</h2>
+        {{ include('_partials/_entry_list.html.twig', {entries: entries, adrTitles: adrTitles, emptyText: 'Noch keine Einträge mit diesem Tag.'}) }}
+    </section>
+
+    <section>
+        <h2>Entscheidungen</h2>
+        {% if adrs is empty %}
+            <p class="empty-state">Keine Entscheidungen mit diesem Tag.</p>
+        {% else %}
+            <ul class="link-list">
+                {% for adr in adrs %}
+                    <li><a href="{{ path('adr', {id: adr.id}) }}">{{ adr.id }} – {{ adr.title }}</a> {{ include('_partials/_adr_status.html.twig', {status: adr.status}) }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ adr.id }} {{ adr.title }} – SK8 Doku{% endblock %}
+
+{% block body %}
+    <article class="document">
+        <header class="page-header">
+            <p class="breadcrumb"><a href="{{ path('adr_list') }}">Architektur-Entscheidungen</a> · {{ adr.id }}</p>
+            <h1>{{ adr.title }}</h1>
+            {{ include('_partials/_meta.html.twig', {item: adr, adrTitles: adrTitles}) }}
+        </header>
+
+        <div class="prose">
+            {{ adr.bodyHtml|raw }}
+        </div>
+
+        {% if relatedEntries is not empty %}
+            <section class="related">
+                <h2>Einträge, die auf {{ adr.id }} verweisen</h2>
+                <ul>
+                    {% for entry in relatedEntries %}
+                        <li><a href="{{ path('entry', {slug: entry.slug}) }}">{{ entry.title }}</a> <small>({{ entry.date|format_date(pattern='d. MMMM y', locale='de') }})</small></li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <footer class="document__footer">
+            <p>Quelle: <code>content/adr/{{ adr.slug }}.md</code> · importiert am {{ adr.importedAt|format_datetime(pattern="d. MMMM y, HH:mm", locale='de') }}</p>
+        </footer>
+    </article>
+{% endblock %}

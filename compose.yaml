@@ -1,0 +1,50 @@
+# Local development (ADR-002, ADR-005): one FrankenPHP container with the repo mounted.
+# PostgreSQL comes from sk8-infrastructure (`make up` there) and is reached through the host.
+# DATABASE_URL is deliberately NOT set here: real environment variables would override
+# .env.local / .env.test.local, which carry the host-specific connection strings.
+#
+#   make up        -> http://localhost:8001
+#   make composer c="require foo"
+#   make test
+
+services:
+  php:
+    build:
+      context: .
+      target: frankenphp_dev
+    environment:
+      APP_ENV: dev
+      SERVER_NAME: ":8000"
+      # Set RUN_MIGRATIONS=1 to migrate and import on container start (production does this always).
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-0}
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    tty: true
+
+###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      # You should definitely change the password in production
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/db/data:/var/lib/postgresql/data:rw
+###< doctrine/doctrine-bundle ###
+
+volumes:
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###

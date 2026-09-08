@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tags – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <h1>Tags</h1>
+        <p class="lead">Themen quer durch Chronik und Entscheidungen.</p>
+    </header>
+
+    {% if tags is empty %}
+        <p class="empty-state">Noch keine Tags vorhanden.</p>
+    {% else %}
+        <ul class="tag-cloud">
+            {% for tag in tags %}
+                <li><a class="badge badge--tag" href="{{ path('tag', {name: tag.name}) }}">#{{ tag.name }} <span class="badge__count">{{ tag.entries + tag.adrs }}</span></a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

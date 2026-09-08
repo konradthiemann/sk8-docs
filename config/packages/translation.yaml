@@ -1,0 +1,7 @@
+framework:
+    # UI texts are written directly in German (ADR-008); the locale drives date formatting.
+    default_locale: de
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks:
+            - de

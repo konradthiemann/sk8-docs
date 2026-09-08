@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lernpfad – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <h1>Lernpfad</h1>
+        <p class="lead">Kuratierte Reihenfolge zum Lesen: Einträge mit <code>learning_path</code> im Frontmatter, vom Fundament zu den Details.</p>
+    </header>
+
+    {{ include('_partials/_entry_list.html.twig', {
+        entries: entries,
+        adrTitles: adrTitles,
+        numbered: true,
+        emptyText: 'Der Lernpfad hat noch keine Einträge. Sobald ein Eintrag ein learning_path-Feld trägt, erscheint er hier.'
+    }) }}
+{% endblock %}

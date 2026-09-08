@@ -1,0 +1,9 @@
+twig:
+    file_name_pattern: '*.twig'
+    form_themes: []
+    globals:
+        app_name: 'SK8 Doku'
+
+when@test:
+    twig:
+        strict_variables: true

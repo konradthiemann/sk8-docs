@@ -1,0 +1,39 @@
+# local tooling
+.claude/
+
+# environment
+.env.local
+.env.*.local
+
+# symfony
+/var/
+/vendor/
+
+# asset mapper
+/public/assets/
+/assets/vendor/
+
+# tool caches
+.phpunit.cache
+.php-cs-fixer.cache
+
+# editor / os
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###

@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suche – SK8 Doku{% endblock %}
+
+{% block body %}
+    <header class="page-header">
+        <h1>Suche</h1>
+        <p class="lead">Volltextsuche über Einträge und Entscheidungen (PostgreSQL <code>tsvector</code>, deutsche Wortstämme).</p>
+    </header>
+
+    <form class="search-page" method="get" action="{{ path('search') }}" role="search">
+        <label class="visually-hidden" for="q-page">Suchbegriff</label>
+        <input id="q-page" type="search" name="q" value="{{ query }}" placeholder="z. B. Doctrine Migration" autofocus>
+        <button type="submit">Suchen</button>
+    </form>
+
+    {% if query is empty %}
+        <p class="empty-state">Gib einen Suchbegriff ein – gesucht wird in Titeln, Zusammenfassungen und dem gesamten Markdown.</p>
+    {% elseif hits is empty %}
+        <p class="empty-state">Keine Treffer für „{{ query }}“. Versuch es mit einem anderen Wort oder stöbere in den <a href="{{ path('tag_list') }}">Tags</a>.</p>
+    {% else %}
+        <p class="search-count">{{ hits|length }} {{ hits|length == 1 ? 'Treffer' : 'Treffer' }} für „{{ query }}“</p>
+        <ol class="hit-list">
+            {% for hit in hits %}
+                <li class="hit">
+                    <h2 class="hit__title">
+                        {% if hit.isEntry %}
+                            <span class="badge badge--kind">Eintrag</span>
+                            <a href="{{ path('entry', {slug: hit.key}) }}">{{ hit.title }}</a>
+                        {% else %}
+                            <span class="badge badge--kind badge--kind-adr">{{ hit.key }}</span>
+                            <a href="{{ path('adr', {id: hit.key}) }}">{{ hit.title }}</a>
+                        {% endif %}
+                    </h2>
+                    <p class="hit__snippet">{{ hit.snippetHtml|raw }}</p>
+                    <time class="meta__date" datetime="{{ hit.date|date('Y-m-d') }}">{{ hit.date|format_date(pattern='d. MMMM y', locale='de') }}</time>
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+{% endblock %}

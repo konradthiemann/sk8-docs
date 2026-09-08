@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>{% block title %}SK8 Doku{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,{{ '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%231d4ed8"/><text x="16" y="22" font-size="16" font-family="system-ui" font-weight="700" fill="white" text-anchor="middle">S8</text></svg>'|url_encode }}">
+    {% block importmap %}{{ importmap('app') }}{% endblock %}
+</head>
+<body>
+<a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+<header class="site-header">
+    <div class="site-header__inner">
+        <a class="brand" href="{{ path('chronicle') }}">SK8 <span>Doku</span></a>
+        <nav class="site-nav" aria-label="Hauptnavigation">
+            {% set current = app.current_route|default('') %}
+            <a href="{{ path('chronicle') }}" {% if current in ['chronicle', 'entry'] %}aria-current="page"{% endif %}>Chronik</a>
+            <a href="{{ path('adr_list') }}" {% if current starts with 'adr' %}aria-current="page"{% endif %}>ADRs</a>
+            <a href="{{ path('learning_path') }}" {% if current == 'learning_path' %}aria-current="page"{% endif %}>Lernpfad</a>
+            <a href="{{ path('tag_list') }}" {% if current starts with 'tag' %}aria-current="page"{% endif %}>Tags</a>
+            <a href="{{ path('repo_list') }}" {% if current starts with 'repo' %}aria-current="page"{% endif %}>Repos</a>
+            <a href="{{ path('search') }}" {% if current == 'search' %}aria-current="page"{% endif %}>Suche</a>
+        </nav>
+        <form class="search-form" action="{{ path('search') }}" method="get" role="search">
+            <label class="visually-hidden" for="q">Suchbegriff</label>
+            <input id="q" type="search" name="q" placeholder="Suchen …" value="{{ app.request.query.get('q') }}">
+        </form>
+    </div>
+</header>
+
+<main id="inhalt" class="site-main">
+    {% block body %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <p>SK8 Doku – Lern-Dokumentation der SK8-Plattform. Inhalte liegen als Markdown im Repo <code>sk8-docs</code>, PostgreSQL ist nur der Index (ADR-004).</p>
+</footer>
+</body>
+</html>
