@@ -7,6 +7,7 @@ namespace App\Tests\Functional\Controller;
 use App\Content\ContentImporter;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Entry pages are exercised with the fixture content because content/entries is
@@ -100,5 +101,38 @@ final class EntryPagesTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'Beispiel-Eintrag');
         self::assertSelectorExists('mark');
+    }
+
+    public function testEntryDetailShowsAllTicketBadgesWhenTheEntryHasThem(): void
+    {
+        $filesystem = new Filesystem();
+        $dir = sys_get_temp_dir() . '/sk8-docs-entry-pages-' . bin2hex(random_bytes(4));
+        $filesystem->mirror(\dirname(__DIR__, 2) . '/Fixtures/content-valid', $dir);
+        $entryFile = $dir . '/entries/0002-zweiter-eintrag.md';
+        file_put_contents($entryFile, str_replace(
+            "summary: Ein zweiter gültiger Eintrag ohne Lernpfad.\n",
+            "summary: Ein zweiter gültiger Eintrag ohne Lernpfad.\ntickets: [T-0102, T-0104]\n",
+            (string) file_get_contents($entryFile),
+        ));
+
+        $result = static::getContainer()->get(ContentImporter::class)->import($dir);
+        $filesystem->remove($dir);
+        self::assertTrue($result->isSuccessful());
+
+        $this->client->request('GET', '/eintrag/zweiter-eintrag');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('.meta', 'T-0102');
+        self::assertSelectorTextContains('.meta', 'T-0104');
+        self::assertCount(2, $this->client->getCrawler()->filter('.meta .badge--ticket'));
+    }
+
+    public function testEntryDetailShowsNoTicketAreaWhenTheEntryHasNone(): void
+    {
+        $this->client->request('GET', '/eintrag/beispiel-eintrag');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('.meta .badge--ticket');
+        self::assertSelectorNotExists('.meta [aria-label="Tickets"]');
     }
 }

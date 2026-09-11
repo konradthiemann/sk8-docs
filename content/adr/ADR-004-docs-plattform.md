@@ -36,6 +36,7 @@ tags: [docs, symfony, twig, markdown, postgresql]
 | `summary` | string | ja | Ein Satz für die Übersicht |
 | `learning_path` | int | nein | Position im Lernpfad |
 | `adrs` | Liste | nein | `[ADR-002]` – verknüpfte Entscheidungen |
+| `tickets` | Liste | nein | `[T-0102, T-0104]` – Ticket-Kennungen, Format `T-NNXX` oder `R-NN` |
 
 Pflicht-Abschnitte im Body: `## Was`, `## Warum`, `## Wie`, `## Tests`, `## Lernpunkte`. Optional: `## Datenbank`, `## API`, `## Alternativen`.
 

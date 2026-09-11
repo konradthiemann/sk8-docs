@@ -19,9 +19,9 @@ final class ContentValidator
     public const array ENTRY_REQUIRED_SECTIONS = ['Was', 'Warum', 'Wie', 'Tests', 'Lernpunkte'];
 
     /** Agent roles that may appear in `agents` (never tool or vendor names). */
-    public const array KNOWN_AGENTS = ['architect', 'tester', 'implementer', 'uiux', 'researcher', 'agentic-engineer'];
+    public const array KNOWN_AGENTS = ['architect', 'tester', 'implementer', 'uiux', 'documentarian', 'researcher', 'agentic-engineer'];
 
-    private const array ENTRY_FIELDS = ['id', 'title', 'date', 'type', 'agents', 'repos', 'tags', 'summary', 'learning_path', 'adrs'];
+    private const array ENTRY_FIELDS = ['id', 'title', 'date', 'type', 'agents', 'repos', 'tags', 'summary', 'learning_path', 'adrs', 'tickets'];
     private const array ENTRY_REQUIRED = ['id', 'title', 'date', 'type', 'agents', 'repos', 'summary'];
 
     private const array ADR_FIELDS = ['id', 'title', 'status', 'date', 'agents', 'tags', 'supersedes', 'superseded_by'];
@@ -30,6 +30,7 @@ final class ContentValidator
     private const string ENTRY_FILENAME = '/^(\d{4})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$/';
     private const string ADR_FILENAME = '/^(ADR-\d{3})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$/';
     private const string ADR_ID = '/^ADR-\d{3}$/';
+    private const string TICKET_ID = '/^(T-\d{4}|R-\d{2})$/';
 
     /**
      * @return list<ValidationError>
@@ -74,6 +75,8 @@ final class ContentValidator
                 }
             }
         }
+
+        $this->checkTickets($fm, $add);
 
         if (1 !== preg_match(self::ENTRY_FILENAME, basename($file), $matches)) {
             $add('file', 'Dateiname muss dem Muster NNNN-slug.md entsprechen (vierstellige Nummer, kebab-case, z. B. 0001-projekt-initialisierung.md).');
@@ -291,6 +294,27 @@ final class ContentValidator
         foreach ($agents as $agent) {
             if (!\in_array($agent, self::KNOWN_AGENTS, true)) {
                 $add('agents', \sprintf('"%s" ist keine bekannte Agenten-Rolle. Erlaubt: %s.', $agent, implode(', ', self::KNOWN_AGENTS)));
+            }
+        }
+    }
+
+    /**
+     * @param array<string, mixed>           $fm
+     * @param callable(string, string): void $add
+     */
+    private function checkTickets(array $fm, callable $add): void
+    {
+        if (!\array_key_exists('tickets', $fm)) {
+            return;
+        }
+        if (!$this->checkStringList($fm, 'tickets', false, $add)) {
+            return;
+        }
+        /** @var list<string> $tickets */
+        $tickets = $fm['tickets'];
+        foreach ($tickets as $ticket) {
+            if (1 !== preg_match(self::TICKET_ID, $ticket)) {
+                $add('tickets', \sprintf('"%s" hat nicht das Format T-NNXX oder R-NN (z. B. T-0102 oder R-04).', $ticket));
             }
         }
     }
