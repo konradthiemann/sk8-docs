@@ -1,5 +1,7 @@
 # sk8-docs – Entwicklungsbefehle.
 # Läuft PHP lokal, werden die Befehle direkt ausgeführt; sonst im Dev-Container (ADR-002).
+# In CI (GitHub Actions setzt CI=true) immer der Container: das Runner-Image bringt
+# eine eigene PHP-Version mit, die älter sein kann als von composer.json verlangt.
 #   make composer ARGS="require foo"   make console ARGS="docs:import --dry-run"
 
 SHELL := bash
@@ -7,10 +9,14 @@ SHELL := bash
 .DEFAULT_GOAL := help
 
 COMPOSE := docker compose
-ifeq (,$(shell command -v php 2>/dev/null))
+ifeq ($(CI),true)
   RUN := $(COMPOSE) run --rm --no-deps php
 else
-  RUN :=
+  ifeq (,$(shell command -v php 2>/dev/null))
+    RUN := $(COMPOSE) run --rm --no-deps php
+  else
+    RUN :=
+  endif
 endif
 PHP := $(RUN) php
 COMPOSER := $(RUN) composer
